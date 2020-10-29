@@ -1,6 +1,161 @@
-#include <stdio.h>
+ï»¿#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 #include <conio.h>
-#include <stdlib.h> // qsrot ÇÔ¼ö°¡ ¼±¾ğµÈ Çì´õ ÆÄÀÏ (ÄüÁ¤·Ä)
+#define TRUE 1
+#define FALSE 0
+#define MAX_VERTICES	100	
+#define INF	1000000	/* ë¬´í•œëŒ€ (ì—°ê²°ì´ ì—†ëŠ” ê²½ìš°) */
+int parent[MAX_VERTICES];		// ë¶€ëª¨ ë…¸ë“œ
+				// ì´ˆê¸°í™”
+typedef struct GraphType {
+	int n;	// ì •ì ì˜ ê°œìˆ˜
+	int weight[MAX_VERTICES][MAX_VERTICES];
+} GraphType;
+
+int distance[MAX_VERTICES];/* ì‹œì‘ì •ì ìœ¼ë¡œë¶€í„°ì˜ ìµœë‹¨ê²½ë¡œ ê±°ë¦¬ */
+int found[MAX_VERTICES];		/* ë°©ë¬¸í•œ ì •ì  í‘œì‹œ */
+int selected[MAX_VERTICES];
+
+
+int choose(int distance[], int n, int found[])
+{
+	int i, min, minpos;
+	min = INT_MAX;
+	minpos = -1;
+	for (i = 0; i < n; i++)
+		if (distance[i] < min && !found[i]) {
+			min = distance[i];
+			minpos = i;
+		}
+	return minpos;
+}
+void print_status(GraphType* g)
+{
+	static int step = 1;
+	printf("STEP %d: ", step++);
+	printf("distance: ");
+	for (int i = 0; i < g->n; i++) {
+		if (distance[i] == INF)
+			printf(" * ");
+		else
+			printf("%2d ", distance[i]);
+	}
+	printf("\n");
+	printf("        found:    ");
+	for (int i = 0; i < g->n; i++)
+		printf("%2d ", found[i]);
+	printf("\n\n");
+}
+//
+void shortest_path(GraphType* g, int start)
+{
+	int i, u, w;
+	for (i = 0; i < g->n; i++) /* ì´ˆê¸°í™” */
+	{
+		distance[i] = g->weight[start][i];
+		found[i] = FALSE;
+	}
+	found[start] = TRUE;    /* ì‹œì‘ ì •ì  ë°©ë¬¸ í‘œì‹œ */
+	distance[start] = 0;
+	for (i = 0; i < g->n - 1; i++) {
+		print_status(g);
+		u = choose(distance, g->n, found);
+		found[u] = TRUE;
+		for (w = 0; w < g->n; w++)
+			if (!found[w])
+				if (distance[u] + g->weight[u][w] < distance[w])
+					distance[w] = distance[u] + g->weight[u][w];
+	}
+}
+int get_min_vertex(int n)
+{
+	int v, i;
+	for (i = 0; i < n; i++)
+		if (!selected[i]) {
+			v = i;
+			break;
+		}
+	for (i = 0; i < n; i++)
+		if (!selected[i] && (distance[i] < distance[v])) v = i;
+	return (v);
+}
+void prim(GraphType* g, int s)
+{
+	int i, u, v;
+
+	for (u = 0; u < g->n; u++)
+		distance[u] = INF;
+	distance[s] = 0;
+	for (i = 0; i < g->n; i++) {
+		u = get_min_vertex(g->n);
+		selected[u] = TRUE;
+		if (distance[u] == INF) return;
+		printf("ì •ì  %d ì¶”ê°€\n", u);
+		for (v = 0; v < g->n; v++)
+			if (g->weight[u][v] != INF)
+				if (!selected[v] && g->weight[u][v] < distance[v])
+					distance[v] = g->weight[u][v];
+	}
+}
+int A[MAX_VERTICES][MAX_VERTICES];
+
+void printA(GraphType *g)
+{
+	int i, j;
+	printf("===============================\n");
+	for (i = 0; i < g->n; i++) {
+		for (j = 0; j < g->n; j++) {
+			if (A[i][j] == INF)
+				printf("  * ");
+			else printf("%3d ", A[i][j]);
+		}
+		printf("\n");
+	}
+	printf("===============================\n");
+}
+
+void floyd(GraphType* g)
+{
+
+	int i, j, k;
+	for (i = 0; i < g->n; i++)
+		for (j = 0; j < g->n; j++)
+			A[i][j] = g->weight[i][j];
+	printA(g);
+
+	for (k = 0; k < g->n; k++) {
+		for (i = 0; i < g->n; i++)
+			for (j = 0; j < g->n; j++)
+				if (A[i][k] + A[k][j] < A[i][j])
+					A[i][j] = A[i][k] + A[k][j];
+		printA(g);
+	}
+}
+int main(void)
+{
+
+	GraphType g = { 7,
+	{{ 0, 8, 10, INF, INF, INF, INF },
+	{ 8,  0, INF, INF, INF, INF, INF },
+	{ 10, INF, 0, 5, INF, INF, INF },
+	{ INF, 9, 5, 0, 13, 12, INF },
+	{ INF, 11, INF, 13, 0, 11, 10 },
+	{ INF, INF, INF, 12, 11, 0, 7 },
+	{ INF, INF, INF, INF, 10, 7 ,0 } }
+	};
+	
+	prim(&g, 3);
+	shortest_path(&g, 0);
+	floyd(&g);
+	_getch();
+	return 0;
+}
+
+
+/*#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h> // qsrot í•¨ìˆ˜ê°€ ì„ ì–¸ëœ í—¤ë” íŒŒì¼ (í€µì •ë ¬)
 
 #define TRUE 1
 #define FALSE 0
@@ -8,40 +163,40 @@
 #define MAX_VERTICES 100
 #define INF 1000
 
-int parent[MAX_VERTICES];		// ºÎ¸ğ ³ëµå
-				// ÃÊ±âÈ­
+int parent[MAX_VERTICES];		// ë¶€ëª¨ ë…¸ë“œ
+				// ì´ˆê¸°í™”
 void set_init(int n)
 {
 	for (int i = 0; i < n; i++)
 		parent[i] = -1;
 }
-// curr°¡ ¼ÓÇÏ´Â ÁıÇÕÀ» ¹İÈ¯ÇÑ´Ù.
+// currê°€ ì†í•˜ëŠ” ì§‘í•©ì„ ë°˜í™˜í•œë‹¤.
 int set_find(int curr)
 {
 	if (parent[curr] == -1)
-		return curr; 			// ·çÆ® 
+		return curr; 			// ë£¨íŠ¸ 
 	while (parent[curr] != -1) curr = parent[curr];
 	return curr;
 }
-// µÎ°³ÀÇ ¿ø¼Ò°¡ ¼ÓÇÑ ÁıÇÕÀ» ÇÕÄ£´Ù.
+// ë‘ê°œì˜ ì›ì†Œê°€ ì†í•œ ì§‘í•©ì„ í•©ì¹œë‹¤.
 void set_union(int a, int b)
 {
-	int root1 = set_find(a);	// ³ëµå aÀÇ ·çÆ®¸¦ Ã£´Â´Ù. 
-	int root2 = set_find(b);	// ³ëµå bÀÇ ·çÆ®¸¦ Ã£´Â´Ù. 
-	if (root1 != root2) 		// ÇÕÇÑ´Ù. 
+	int root1 = set_find(a);	// ë…¸ë“œ aì˜ ë£¨íŠ¸ë¥¼ ì°¾ëŠ”ë‹¤. 
+	int root2 = set_find(b);	// ë…¸ë“œ bì˜ ë£¨íŠ¸ë¥¼ ì°¾ëŠ”ë‹¤. 
+	if (root1 != root2) 		// í•©í•œë‹¤. 
 		parent[root1] = root2;
 }
 
-struct Edge {			// °£¼±À» ³ªÅ¸³»´Â ±¸Á¶Ã¼
+struct Edge {			// ê°„ì„ ì„ ë‚˜íƒ€ë‚´ëŠ” êµ¬ì¡°ì²´
 	int start, end, weight;
 };
 
 typedef struct GraphType {
-	int n;	// °£¼±ÀÇ °³¼ö
+	int n;	// ê°„ì„ ì˜ ê°œìˆ˜
 	struct Edge edges[2 * MAX_VERTICES];
 } GraphType;
 
-// ±×·¡ÇÁ ÃÊ±âÈ­ 
+// ê·¸ë˜í”„ ì´ˆê¸°í™” 
 void graph_init(GraphType* g)
 {
 	g->n = 0;
@@ -51,7 +206,7 @@ void graph_init(GraphType* g)
 		g->edges[i].weight = INF;
 	}
 }
-// °£¼± »ğÀÔ ¿¬»ê
+// ê°„ì„  ì‚½ì… ì—°ì‚°
 void insert_edge(GraphType* g, int start, int end, int w)
 {
 	g->edges[g->n].start = start;
@@ -59,35 +214,34 @@ void insert_edge(GraphType* g, int start, int end, int w)
 	g->edges[g->n].weight = w;
 	g->n++;
 }
-// qsort()¿¡ »ç¿ëµÇ´Â ÇÔ¼ö
+// qsort()ì— ì‚¬ìš©ë˜ëŠ” í•¨ìˆ˜
 int compare(const void* a, const void* b)
 {
 	struct Edge* x = (struct Edge*)a;
 	struct Edge* y = (struct Edge*)b;
 	return (x->weight - y->weight);
 }
-// kruskalÀÇ ÃÖ¼Ò ºñ¿ë ½ÅÀå Æ®¸® ÇÁ·Î±×·¥
-void kruskal(int n)
+// kruskalì˜ ìµœì†Œ ë¹„ìš© ì‹ ì¥ íŠ¸ë¦¬ í”„ë¡œê·¸ë¨
+void kruskal(GraphType* g)
 {
-	int edge_accepted = 0;	// ÇöÀç±îÁö ¼±ÅÃµÈ °£¼±ÀÇ ¼ö	
-	int uset, vset;		// Á¤Á¡ u¿Í Á¤Á¡ vÀÇ ÁıÇÕ ¹øÈ£
+	int edge_accepted = 0;	// í˜„ì¬ê¹Œì§€ ì„ íƒëœ ê°„ì„ ì˜ ìˆ˜	
+	int uset, vset;		// ì •ì  uì™€ ì •ì  vì˜ ì§‘í•© ë²ˆí˜¸
 	struct Edge e;
-	GraphType* g = NULL;
 
-	set_init(n);		// ÁıÇÕ ÃÊ±âÈ­
-	qsort(g->edges, n, sizeof(struct Edge), compare);
+	set_init(g->n);		// ì§‘í•© ì´ˆê¸°í™”
+	qsort(g->edges, g->n, sizeof(struct Edge), compare);
 
-	printf("Å©·ç½ºÄ® ÃÖ¼Ò ½ÅÀå Æ®¸® ¾Ë°í¸®Áò \n");
+	printf("í¬ë£¨ìŠ¤ì¹¼ ìµœì†Œ ì‹ ì¥ íŠ¸ë¦¬ ì•Œê³ ë¦¬ì¦˜ \n");
 	int i = 0;
-	while (edge_accepted < n-1)	// ½ÅÀåÆ®¸® °£¼±ÀÇ ¼ö = (n-1)
+	while (edge_accepted < g->n)	// ì‹ ì¥íŠ¸ë¦¬ ê°„ì„ ì˜ ìˆ˜ = (n-1)
 	{
 		e = g->edges[i];
-		uset = set_find(e.start);	// Á¤Á¡ uÀÇ ÁıÇÕ ¹øÈ£ 
-		vset = set_find(e.end);		// Á¤Á¡ vÀÇ ÁıÇÕ ¹øÈ£
-		if (uset != vset) {		// ¼­·Î ¼ÓÇÑ ÁıÇÕÀÌ ´Ù¸£¸é
-			printf("°£¼± (%d,%d) %d ¼±ÅÃ\n", e.start, e.end, e.weight);
+		uset = set_find(e.start);	// ì •ì  uì˜ ì§‘í•© ë²ˆí˜¸ 
+		vset = set_find(e.end);		// ì •ì  vì˜ ì§‘í•© ë²ˆí˜¸
+		if (uset != vset) {		// ì„œë¡œ ì†í•œ ì§‘í•©ì´ ë‹¤ë¥´ë©´
+			printf("ê°„ì„  (%d,%d) %d ì„ íƒ\n", e.start, e.end, e.weight);
 			edge_accepted++;
-			set_union(uset, vset);	// µÎ°³ÀÇ ÁıÇÕÀ» ÇÕÄ£´Ù.
+			set_union(uset, vset);	// ë‘ê°œì˜ ì§‘í•©ì„ í•©ì¹œë‹¤.
 		}
 		i++;
 	}
@@ -98,6 +252,11 @@ int main() {
 	int num_node;
 	int *weight;
 	int i, j;
+	GraphType *g;
+	g = new GraphType[100];
+	g = (GraphType *)malloc(sizeof(GraphType));
+	graph_init(g);
+	weight = new int[100];
 	fp = fopen("graph_N.txt", "r");
 	if (fp != NULL) {
 		fscanf(fp, "%d", &num_node);
@@ -108,11 +267,10 @@ int main() {
 		printf("\n");
 		for (i = 0; i < num_node; i++) {
 			for (j = 0; j < num_node; j++)
-				printf("%d ", weight[i*num_node + j]);
-			printf("\n");
+				insert_edge(g, i+1, j+1, weight[i*num_node + j]);
 		}
 	}
 
-	kruskal(num_node); // Å©·¯½ºÄÃ ¾Ë°í¸®Áò È£Ãâ
+	kruskal(g); // í¬ëŸ¬ìŠ¤ì»¬ ì•Œê³ ë¦¬ì¦˜ í˜¸ì¶œ
 	_getch();
-}
+}*/
