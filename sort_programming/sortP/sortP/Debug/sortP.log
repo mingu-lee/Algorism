@@ -1,0 +1,8 @@
+﻿  소스.cpp
+c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp(1): warning C4005: '_CRT_SECURE_NO_WARNINGS': 매크로 재정의
+  c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp: note: '_CRT_SECURE_NO_WARNINGS'의 이전 정의를 참조하십시오.
+c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp(413): warning C4101: 'temp' :참조되지 않은 지역 변수입니다.
+c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp(433): warning C4101: 'temp' :참조되지 않은 지역 변수입니다.
+c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp(500): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+c:\users\lee\desktop\algo\sort_programming\sortp\sortp\소스.cpp(504): warning C4101: 'j' :참조되지 않은 지역 변수입니다.
+  sortP.vcxproj -> C:\Users\lee\Desktop\algo\sort_programming\sortP\Debug\sortP.exe
