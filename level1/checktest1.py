@@ -1,6 +1,6 @@
 def solution(arr):
-    arr.sort(reverse=True)
-    arr.remove(arr[-1])
+    arrMin = min(arr)
+    arr.remove(arrMin)
     if not arr:
         arr.insert(0,-1)
     return arr
