@@ -1,1 +1,3 @@
-## str_press.py 추가
+## str_press 추가
+
+## high_low_lotto 추가
